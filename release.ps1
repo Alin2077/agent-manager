@@ -5,7 +5,7 @@ $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 
 # 1. Get last tag
-$lastTag = git describe --tags --abbrev=0 2>$null
+$lastTag = git tag --sort=-version:refname | Select-Object -First 1
 if ($lastTag) {
     Write-Host "Last release: " -NoNewline
     Write-Host $lastTag -ForegroundColor Cyan
