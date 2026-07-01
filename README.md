@@ -18,10 +18,7 @@
 
 | 平台 | 文件 |
 |------|------|
-| Windows | `agent-manager-windows-amd64.exe` |
-| Linux | `agent-manager-linux-amd64` |
-| macOS Intel | `agent-manager-macos-amd64` |
-| macOS Apple Silicon | `agent-manager-macos-arm64` |
+| Windows | `agent-manager-v0.2.0-x86_64-pc-windows-msvc.exe` |
 
 #### Windows
 
@@ -30,40 +27,11 @@
 3. 打开 **系统属性 → 环境变量**，在 `Path` 中新增 `C:\Program Files\agent-manager`
 4. 重新打开终端，输入 `agent-manager --help` 验证
 
-#### Linux
-
-```bash
-chmod +x agent-manager-linux-amd64
-sudo mv agent-manager-linux-amd64 /usr/local/bin/agent-manager
-agent-manager --help
-```
-
-#### macOS
-
-```bash
-chmod +x agent-manager-macos-arm64      # Apple Silicon 用这个
-# 或 chmod +x agent-manager-macos-amd64  # Intel Mac 用这个
-sudo mv agent-manager-macos-arm64 /usr/local/bin/agent-manager
-xattr -d com.apple.quarantine /usr/local/bin/agent-manager 2>/dev/null  # 跳过 Gatekeeper
-agent-manager --help
-```
-
 ### 方式二：桌面 GUI 安装包（推荐普通用户）
 
-从 [Releases](https://github.com/Alin2077/agent-manager/releases) 页面下载对应平台的安装程序：
+从 [Releases](https://github.com/Alin2077/agent-manager/releases) 页面下载 `Agent Manager_*_x64-setup.exe`，双击安装。
 
-| 平台 | 文件 | 安装方式 |
-|------|------|----------|
-| Windows | `Agent Manager_*.msi` | 双击运行，按向导安装 |
-| macOS | `Agent Manager_*.dmg` | 打开后拖入 Applications |
-| Linux | `Agent Manager_*.deb` | `sudo dpkg -i <file>.deb` |
-| Linux | `Agent Manager_*.AppImage` | `chmod +x` 后直接运行 |
 
-### 方式三：Cargo 安装（CLI）
-
-```bash
-cargo install --git https://github.com/Alin2077/agent-manager.git
-```
 
 ## 使用
 

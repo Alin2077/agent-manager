@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -38,14 +38,6 @@ jobs:
             target: x86_64-pc-windows-msvc
             artifact: agent-manager.exe
             ext: ".exe"
-          - os: macos-latest
-            target: x86_64-apple-darwin
-            artifact: agent-manager
-            ext: ""
-          - os: macos-latest
-            target: aarch64-apple-darwin
-            artifact: agent-manager
-            ext: ""
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -95,10 +87,6 @@ jobs:
         include:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-          - os: macos-latest
-            target: x86_64-apple-darwin
-          - os: macos-latest
-            target: aarch64-apple-darwin
     steps:
       - uses: actions/checkout@v4
 
