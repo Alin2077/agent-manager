@@ -73,11 +73,14 @@ jobs:
       - name: Rename & upload
         shell: bash
         run: |
-          V="${GITHUB_REF_NAME#v}"
+          TAG="${{ github.ref_name }}"
+          V="${TAG#v}"
           SRC="target/${{ matrix.target }}/release/${{ matrix.artifact }}"
           DST="agent-manager-v${V}-${{ matrix.target }}${{ matrix.ext }}"
           cp "$SRC" "$DST"
-          gh release upload "$GITHUB_REF_NAME" "$DST" --clobber
+          # create release if not exists, then upload
+          gh release view "$TAG" &>/dev/null || gh release create "$TAG" --title "$TAG" --notes ""
+          gh release upload "$TAG" "$DST" --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
