@@ -1,32 +1,32 @@
-{
-  "productName": "Agent Manager",
-  "version": "0.1.0",
-  "identifier": "com.agent-manager.app",
-  "build": {
-    "frontendDist": "dist",
-    "beforeDevCommand": "",
-    "beforeBuildCommand": ""
-  },
-  "bundle": {
-    "active": true,
-    "targets": "all",
-    "icon": [
-      "icons/32x32.png",
-      "icons/icon.ico"
-    ]
-  },
-  "app": {
-    "windows": [
-      {
-        "title": "Agent Manager",
-        "width": 960,
-        "height": 680,
-        "resizable": true,
-        "fullscreen": false
-      }
-    ],
-    "security": {
-      "csp": null
-    }
-  }
+﻿{
+    "productName":  "Agent Manager",
+    "version":  "0.2.4",
+    "identifier":  "com.agent-manager.app",
+    "build":  {
+                  "frontendDist":  "dist",
+                  "beforeDevCommand":  "",
+                  "beforeBuildCommand":  ""
+              },
+    "bundle":  {
+                   "active":  true,
+                   "targets":  "all",
+                   "icon":  [
+                                "icons/32x32.png",
+                                "icons/icon.ico"
+                            ]
+               },
+    "app":  {
+                "windows":  [
+                                {
+                                    "title":  "Agent Manager",
+                                    "width":  960,
+                                    "height":  680,
+                                    "resizable":  true,
+                                    "fullscreen":  false
+                                }
+                            ],
+                "security":  {
+                                 "csp":  null
+                             }
+            }
 }
