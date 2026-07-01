@@ -37,33 +37,43 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             artifact: agent-manager
-            asset_name: agent-manager-linux-amd64
+            ext: ""
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             artifact: agent-manager.exe
-            asset_name: agent-manager-windows-amd64.exe
+            ext: ".exe"
           - os: macos-latest
             target: x86_64-apple-darwin
             artifact: agent-manager
-            asset_name: agent-manager-macos-amd64
+            ext: ""
           - os: macos-latest
             target: aarch64-apple-darwin
             artifact: agent-manager
-            asset_name: agent-manager-macos-arm64
+            ext: ""
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
       - uses: Swatinem/rust-cache@v2
+
+      - name: Inject version
+        shell: bash
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          sed -i "s/^version = .*/version = \"$V\"/" cli/Cargo.toml
+
       - name: Build CLI
         run: cargo build --release -p agent-manager --target ${{ matrix.target }}
-      - name: Rename
+
+      - name: Rename & upload
         shell: bash
-        run: cp target/${{ matrix.target }}/release/${{ matrix.artifact }} ${{ matrix.asset_name }}
-      - uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ matrix.asset_name }}
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          SRC="target/${{ matrix.target }}/release/${{ matrix.artifact }}"
+          DST="agent-manager-v${V}-${{ matrix.target }}${{ matrix.ext }}"
+          cp "$SRC" "$DST"
+          gh release upload "$GITHUB_REF_NAME" "$DST" --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -99,6 +109,21 @@ jobs:
       - name: Install Tauri CLI
         run: npm install -g @tauri-apps/cli
 
+      - name: Inject version
+        shell: bash
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          python3 -c "
+          import json
+          with open('gui/tauri.conf.json') as f:
+              cfg = json.load(f)
+          cfg['version'] = '$V'
+          cfg['productName'] = 'Agent Manager'
+          with open('gui/tauri.conf.json', 'w') as f:
+              json.dump(cfg, f, indent=2)
+          print(f'App version set to $V')
+          "
+
       - name: Install Linux deps
         if: runner.os == 'Linux'
         run: |
@@ -109,7 +134,7 @@ jobs:
         working-directory: gui
         run: tauri build --target ${{ matrix.target }}
 
-      - name: Upload GUI artifacts to Release
+      - name: Upload GUI artifacts
         shell: bash
         run: |
           BUNDLE="target/${{ matrix.target }}/release/bundle"
@@ -120,6 +145,9 @@ jobs:
             -name "*setup*.exe" -o \
             -name "*.deb" -o \
             -name "*.AppImage" \
-          \) -print -exec gh release upload "${{ github.ref_name }}" {} --clobber \;
+          \) -print0 | while IFS= read -r -d '' f; do
+            echo "Uploading: $f"
+            gh release upload "$GITHUB_REF_NAME" "$f" --clobber
+          done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

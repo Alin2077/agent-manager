@@ -15,7 +15,7 @@ if ($lastTag) {
 
 # 2. Prompt for new version
 Write-Host ""
-$newVersion = Read-Host "Enter new version (e.g. v0.1.0)"
+$newVersion = Read-Host "Enter new version (e.g. v0.2.0)"
 
 if (-not $newVersion) {
     Write-Host "Error: version cannot be empty" -ForegroundColor Red
@@ -47,27 +47,48 @@ if ($tagExists) {
     Write-Host "Old tag removed." -ForegroundColor Gray
 }
 
-# 5. Check working tree is clean
-$status = git status --porcelain
-if ($status) {
-    Write-Host "Warning: uncommitted changes:" -ForegroundColor Yellow
-    Write-Host $status
-    $force = Read-Host "Continue anyway? (y/n)"
-    if ($force -ne "y" -and $force -ne "Y") {
-        Write-Host "Cancelled" -ForegroundColor Yellow
-        exit 0
-    }
-}
+# 5. Inject version into files
+$plainVersion = $newVersion.TrimStart('v')
+Write-Host ""
+Write-Host "Setting version to $plainVersion in config files..." -ForegroundColor Cyan
 
-# 6. Tag and push
+# Update cli/Cargo.toml
+$cliToml = Get-Content "cli/Cargo.toml" -Raw
+$cliToml = $cliToml -replace '^version = ".*"', "version = `"$plainVersion`""
+[System.IO.File]::WriteAllText("$PSScriptRoot/cli/Cargo.toml", $cliToml, [System.Text.UTF8Encoding]::new($false))
+
+# Update gui/Cargo.toml
+$guiToml = Get-Content "gui/Cargo.toml" -Raw
+$guiToml = $guiToml -replace '^version = ".*"', "version = `"$plainVersion`""
+[System.IO.File]::WriteAllText("$PSScriptRoot/gui/Cargo.toml", $guiToml, [System.Text.UTF8Encoding]::new($false))
+
+# Update gui/tauri.conf.json
+$tauriConf = Get-Content "gui/tauri.conf.json" -Raw | ConvertFrom-Json
+$tauriConf.version = $plainVersion
+$tauriConf | ConvertTo-Json -Depth 10 | [System.IO.File]::WriteAllText("$PSScriptRoot/gui/tauri.conf.json", $_, [System.Text.UTF8Encoding]::new($false))
+
+Write-Host "  cli/Cargo.toml       -> $plainVersion"
+Write-Host "  gui/Cargo.toml       -> $plainVersion"
+Write-Host "  gui/tauri.conf.json  -> $plainVersion"
+
+# 6. Commit version bump
+git add cli/Cargo.toml gui/Cargo.toml gui/tauri.conf.json
+git commit -m "chore: bump version to $newVersion" 2>$null
+
+# 7. Tag and push
 Write-Host ""
 Write-Host "Creating tag: $newVersion ..." -ForegroundColor Cyan
 git tag $newVersion
 
 Write-Host "Pushing to GitHub ..." -ForegroundColor Cyan
+git push origin master
 git push origin $newVersion
 
 Write-Host ""
 Write-Host "Done! Release $newVersion pushed." -ForegroundColor Green
-Write-Host "GitHub Actions is building the binaries..." -ForegroundColor Gray
-Write-Host "Track progress: https://github.com/Alin2077/agent-manager/actions" -ForegroundColor Gray
+Write-Host ""
+Write-Host "GitHub Actions is building:" -ForegroundColor Gray
+Write-Host "  CLI binaries:    agent-manager-v${plainVersion}-*" -ForegroundColor Gray
+Write-Host "  GUI installers:  Agent Manager_${plainVersion}_*" -ForegroundColor Gray
+Write-Host ""
+Write-Host "Track: https://github.com/Alin2077/agent-manager/actions" -ForegroundColor Gray
