@@ -383,14 +383,11 @@ async function showVersion() {
 }
 
 async function checkUpdate() {
-  const label = document.getElementById('version-label');
-  label.textContent = '检查中...';
   try {
     const msg = await window.__TAURI__.invoke('check_update');
     toast(msg);
     showVersion();
   } catch (e) {
     toast('检查更新失败: ' + e, 'error');
-    showVersion();
   }
 }
