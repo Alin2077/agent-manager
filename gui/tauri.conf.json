@@ -1,6 +1,6 @@
 {
     "productName":  "Agent Manager",
-    "version":  "0.2.9",
+    "version":  "0.2.10",
     "identifier":  "com.agent-manager.app",
     "build":  {
                   "frontendDist":  "dist",
@@ -15,18 +15,18 @@
                                 "icons/icon.ico"
                             ]
                },
-    "plugins": {
-        "updater": {
-            "endpoints": [
-                "https://github.com/Alin2077/agent-manager/releases/latest/download/latest.json"
-            ],
-            "windows": {
-                "installMode": "passive"
-            }
-        }
-    },
+    "plugins":  {
+                    "updater":  {
+                                    "endpoints":  [
+                                                      "https://github.com/Alin2077/agent-manager/releases/latest/download/latest.json"
+                                                  ],
+                                    "windows":  {
+                                                    "installMode":  "passive"
+                                                }
+                                }
+                },
     "app":  {
-                "withGlobalTauri": true,
+                "withGlobalTauri":  true,
                 "windows":  [
                                 {
                                     "title":  "Agent Manager",
