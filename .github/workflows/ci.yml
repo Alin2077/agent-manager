@@ -117,13 +117,16 @@ jobs:
           V="${GITHUB_REF_NAME#v}"
           python3 -c "
           import json
-          with open('gui/tauri.conf.json') as f:
-              cfg = json.load(f)
+          with open('gui/tauri.conf.json', 'rb') as f:
+              raw = f.read()
+          # strip BOM if present
+          if raw[:3] == b'\xef\xbb\xbf':
+              raw = raw[3:]
+          cfg = json.loads(raw)
           cfg['version'] = '$V'
-          cfg['productName'] = 'Agent Manager'
           with open('gui/tauri.conf.json', 'w') as f:
               json.dump(cfg, f, indent=2)
-          print(f'App version set to $V')
+          print('App version set to $V')
           "
 
       - name: Build Tauri app

@@ -65,7 +65,8 @@ $guiToml = $guiToml -replace '^version = ".*"', "version = `"$plainVersion`""
 # Update gui/tauri.conf.json
 $tauriConf = Get-Content "gui/tauri.conf.json" -Raw | ConvertFrom-Json
 $tauriConf.version = $plainVersion
-$tauriConf | ConvertTo-Json -Depth 10 | Set-Content "$PSScriptRoot/gui/tauri.conf.json" -Encoding UTF8
+$json = $tauriConf | ConvertTo-Json -Depth 10
+[System.IO.File]::WriteAllText("$PSScriptRoot\gui\tauri.conf.json", $json, [System.Text.UTF8Encoding]::new($false))
 
 Write-Host "  cli/Cargo.toml       -> $plainVersion"
 Write-Host "  gui/Cargo.toml       -> $plainVersion"
