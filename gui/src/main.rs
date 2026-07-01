@@ -7,7 +7,22 @@ use tauri_plugin_updater::UpdaterExt;
 
 #[tauri::command]
 fn scan_agents() -> Vec<models::AgentInfo> {
-    scanner::get_agents()
+    let agents = scanner::get_agents();
+    scanner::save_agents_cache(&agents);
+    agents
+}
+
+#[tauri::command]
+fn load_agents() -> Vec<models::AgentInfo> {
+    let cached = scanner::load_cached_agents();
+    if cached.is_empty() {
+        // 首次运行，自动扫描
+        let agents = scanner::get_agents();
+        scanner::save_agents_cache(&agents);
+        agents
+    } else {
+        cached
+    }
 }
 
 // ── Profiles ──
@@ -66,6 +81,11 @@ fn delete_skill(name: String) -> Result<(), String> {
     skills::delete_skill(&name)
 }
 
+#[tauri::command]
+fn scan_skills(agent: String) -> Vec<models::Skill> {
+    scanner::scan_agent_skills(&agent)
+}
+
 // ── Launch ──
 
 #[tauri::command]
@@ -73,11 +93,23 @@ fn launch_agent(agent: String, profile: Option<String>) -> Result<i32, String> {
     launcher::launch_agent(&agent, profile.as_deref())
 }
 
-// ── Updater ──
+// ── Settings ──
 
 #[tauri::command]
 fn get_version(app: tauri::AppHandle) -> String {
     app.package_info().version.to_string()
+}
+
+#[tauri::command]
+fn get_language() -> String {
+    config::load_global_config().language
+}
+
+#[tauri::command]
+fn save_language(lang: String) -> Result<(), String> {
+    let mut global = config::load_global_config();
+    global.language = lang;
+    config::save_global_config(&global)
 }
 
 #[tauri::command]
@@ -102,6 +134,7 @@ fn main() {
         .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             scan_agents,
+            load_agents,
             list_profiles,
             get_profile,
             save_profile,
@@ -112,8 +145,11 @@ fn main() {
             get_skill,
             save_skill,
             delete_skill,
+            scan_skills,
             launch_agent,
             get_version,
+            get_language,
+            save_language,
             check_update,
         ])
         .run(tauri::generate_context!())

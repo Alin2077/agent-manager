@@ -93,10 +93,12 @@ pub fn load_global_config() -> GlobalConfig {
         let content = fs::read_to_string(&path).unwrap_or_default();
         toml::from_str(&content).unwrap_or(GlobalConfig {
             default_profile: None,
+            language: "zh-CN".into(),
         })
     } else {
         GlobalConfig {
             default_profile: None,
+            language: "zh-CN".into(),
         }
     }
 }

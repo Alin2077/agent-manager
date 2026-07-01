@@ -220,6 +220,8 @@ fn cmd_profile_add(name: &str) {
 
     let profile = Profile {
         name: name.to_string(),
+        agent: String::new(),
+        agent_name: String::new(),
         format,
         base_url,
         model,
@@ -373,6 +375,7 @@ fn cmd_skill_add(name: &str) {
 
     let skill = Skill {
         name: name.to_string(),
+        agent: String::new(),
         description,
         version,
         prompt,

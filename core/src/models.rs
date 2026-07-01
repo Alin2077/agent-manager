@@ -42,6 +42,10 @@ pub struct AgentInfo {
 pub struct Profile {
     /// Profile 名称
     pub name: String,
+    /// 关联的 Agent 二进制名
+    pub agent: String,
+    /// 关联的 Agent 显示名
+    pub agent_name: String,
     /// 配置格式
     pub format: AgentFormat,
     /// API Base URL
@@ -61,6 +65,8 @@ pub struct Profile {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Skill {
     pub name: String,
+    /// 所属 Agent 二进制名，为空则通用
+    pub agent: String,
     pub description: String,
     pub version: String,
     pub prompt: String,
@@ -70,4 +76,11 @@ pub struct Skill {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GlobalConfig {
     pub default_profile: Option<String>,
+    /// 语言：zh-CN / en-US
+    #[serde(default = "default_language")]
+    pub language: String,
+}
+
+fn default_language() -> String {
+    "zh-CN".into()
 }
