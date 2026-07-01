@@ -1,12 +1,11 @@
-// Tauri v2 IPC — 兼容不同版本的 API 路径
-const __tauri = window.__TAURI__;
-const invoke = (cmd, args = {}) => {
-  if (!__tauri) throw new Error('Tauri runtime not loaded');
-  // v2: core.invoke, 或顶层 invoke（withGlobalTauri: true 时）
-  const api = __tauri.core?.invoke || __tauri.invoke;
-  if (!api) throw new Error('Tauri invoke not available');
-  return api(cmd, args);
-};
+// Tauri v2 IPC — 延迟访问，兼容不同注入时序
+function invoke(cmd, args = {}) {
+  const t = window.__TAURI__;
+  if (!t) throw new Error('Tauri not loaded');
+  if (t.invoke) return t.invoke(cmd, args);
+  if (t.core?.invoke) return t.core.invoke(cmd, args);
+  throw new Error('No invoke API found');
+}
 
 // ═══════════════════════════════════════════
 // i18n
@@ -569,8 +568,11 @@ async function switchLang(value) {
 // ═══════════════════════════════════════════
 
 (async () => {
-  await initLang();
-  document.getElementById('lang-select')?.value = lang;
-  loadPage('agents');
-  showVersion();
+  try {
+    await initLang();
+    loadPage('agents');
+    showVersion();
+  } catch (e) {
+    document.getElementById('content').innerHTML = `<div class="empty">启动出错: ${e.message || e}</div>`;
+  }
 })();
