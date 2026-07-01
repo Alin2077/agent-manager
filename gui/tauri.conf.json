@@ -1,0 +1,24 @@
+{
+  "productName": "Agent Manager",
+  "version": "0.1.0",
+  "identifier": "com.agent-manager.app",
+  "build": {
+    "frontendDist": "dist",
+    "beforeDevCommand": "",
+    "beforeBuildCommand": ""
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Agent Manager",
+        "width": 960,
+        "height": 680,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  }
+}

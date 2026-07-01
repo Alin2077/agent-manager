@@ -66,8 +66,8 @@ jobs:
       - name: Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Build release
-        run: cargo build --release --target ${{ matrix.target }}
+      - name: Build release (CLI only)
+        run: cargo build --release -p agent-manager --target ${{ matrix.target }}
 
       - name: Rename artifact
         shell: bash

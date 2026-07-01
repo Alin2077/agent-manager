@@ -40,7 +40,7 @@ pub struct AgentInfo {
 /// Agent 配置 Profile
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Profile {
-    /// Profile 名称（用作文件名）
+    /// Profile 名称
     pub name: String,
     /// 配置格式
     pub format: AgentFormat,

@@ -1,0 +1,10 @@
+[package]
+name = "agent-manager"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+agent-manager-core = { path = "../core" }
+clap = { version = "4", features = ["derive"] }
+colored = "2"
+dialoguer = "0.11"
