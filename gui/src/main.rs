@@ -1,4 +1,5 @@
 use agent_manager_core::{config, launcher, models, scanner, skills};
+use tauri_plugin_updater::UpdaterExt;
 
 // ── Agents ──
 
@@ -78,21 +79,24 @@ fn get_version(app: tauri::AppHandle) -> String {
 }
 
 #[tauri::command]
-fn check_update(app: tauri::AppHandle) -> Result<String, String> {
-    let current = app.package_info().version.to_string();
-    let url = format!(
-        "https://github.com/Alin2077/agent-manager/releases/latest"
-    );
-    // 用系统默认浏览器打开 release 页面
-    if webbrowser::open(&url).is_ok() {
-        Ok(format!("当前版本 v{}，已打开下载页面", current))
-    } else {
-        Ok(format!("当前版本 v{}，请前往 {} 下载最新版", current, url))
+async fn check_update(app: tauri::AppHandle) -> Result<String, String> {
+    let updater = app.updater().map_err(|e| e.to_string())?;
+    match updater.check().await.map_err(|e| e.to_string())? {
+        Some(update) => {
+            let version = update.version.clone();
+            update.download_and_install(
+                |_chunk, _total| {},
+                || {}
+            ).await.map_err(|e| e.to_string())?;
+            Ok(format!("已更新到 v{}，请重启应用", version))
+        }
+        None => Ok("已是最新版本".into()),
     }
 }
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             scan_agents,

@@ -13,6 +13,10 @@
 .DS_Store
 Thumbs.db
 
+# Signing keys
+tauri.key
+tauri.key.pub
+
 # Build artifacts
 *.exe
 *.dll
