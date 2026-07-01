@@ -1,5 +1,12 @@
-// Tauri v2 IPC
-const invoke = (cmd, args = {}) => window.__TAURI__.core.invoke(cmd, args);
+// Tauri v2 IPC — 兼容不同版本的 API 路径
+const __tauri = window.__TAURI__;
+const invoke = (cmd, args = {}) => {
+  if (!__tauri) throw new Error('Tauri runtime not loaded');
+  // v2: core.invoke, 或顶层 invoke（withGlobalTauri: true 时）
+  const api = __tauri.core?.invoke || __tauri.invoke;
+  if (!api) throw new Error('Tauri invoke not available');
+  return api(cmd, args);
+};
 
 // ═══════════════════════════════════════════
 // i18n
@@ -79,7 +86,9 @@ function t(key) {
 }
 
 async function initLang() {
-  try { lang = await invoke('get_language'); } catch (_) {}
+  try { lang = await invoke('get_language'); } catch (e) {
+    console.error('initLang failed:', e);
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -133,7 +142,9 @@ async function renderAgents() {
   try {
     cachedAgents = await invoke('load_agents');
     showAgents(cachedAgents);
-  } catch (_) {}
+  } catch (e) {
+    document.getElementById('agent-list').innerHTML = `<div class="empty">加载失败: ${e}</div>`;
+  }
 }
 
 async function scanAndShow() {
