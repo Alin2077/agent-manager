@@ -60,8 +60,16 @@ jobs:
       - name: Inject version
         shell: bash
         run: |
-          V="${GITHUB_REF_NAME#v}"
-          sed -i "s/^version = .*/version = \"$V\"/" cli/Cargo.toml
+          python3 -c "
+          import re
+          v = '${{ github.ref_name }}'.lstrip('v')
+          with open('cli/Cargo.toml') as f:
+              c = f.read()
+          c = re.sub(r'^version = .*', f'version = \"{v}\"', c, flags=re.M)
+          with open('cli/Cargo.toml', 'w') as f:
+              f.write(c)
+          print(f'CLI version: {v}')
+          "
 
       - name: Build CLI
         run: cargo build --release -p agent-manager --target ${{ matrix.target }}
