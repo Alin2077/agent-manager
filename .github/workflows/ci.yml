@@ -80,13 +80,21 @@ jobs:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
           - os: macos-latest
-            target: universal-apple-darwin
+            target: aarch64-apple-darwin
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
       - uses: Swatinem/rust-cache@v2
+
+      - name: Install Tauri CLI
+        run: npm install -g @tauri-apps/cli
 
       - name: Install Linux deps
         if: runner.os == 'Linux'
@@ -100,6 +108,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: gui
+          tauriScript: tauri
           args: --target ${{ matrix.target }}
           tagName: ${{ github.ref_name }}
-          releaseName: "v__VERSION__"
+          releaseName: ${{ github.ref_name }}

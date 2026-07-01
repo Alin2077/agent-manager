@@ -13,7 +13,7 @@ use std::collections::HashMap;
 #[command(name = "agent-manager", version, about)]
 struct Cli {
     #[command(subcommand)]
-    command: Command,
+    command: Option<Command>,
 }
 
 #[derive(Subcommand)]
@@ -55,8 +55,8 @@ enum SkillCmd {
 fn main() {
     let cli = Cli::parse();
     match &cli.command {
-        Command::Scan { verbose } => cmd_scan(*verbose),
-        Command::Profile(cmd) => match cmd {
+        Some(Command::Scan { verbose }) => cmd_scan(*verbose),
+        Some(Command::Profile(cmd)) => match cmd {
             ProfileCmd::List => cmd_profile_list(),
             ProfileCmd::Add { name } => cmd_profile_add(name),
             ProfileCmd::Show { name } => cmd_profile_show(name),
@@ -64,14 +64,27 @@ fn main() {
             ProfileCmd::Delete { name } => cmd_profile_delete(name),
             ProfileCmd::SetDefault { name } => cmd_profile_set_default(name),
         },
-        Command::Skill(cmd) => match cmd {
+        Some(Command::Skill(cmd)) => match cmd {
             SkillCmd::List => cmd_skill_list(),
             SkillCmd::Add { name } => cmd_skill_add(name),
             SkillCmd::Show { name } => cmd_skill_show(name),
             SkillCmd::Edit { name } => cmd_skill_edit(name),
             SkillCmd::Delete { name } => cmd_skill_delete(name),
         },
-        Command::Launch { agent, profile } => cmd_launch(agent, profile.as_deref()),
+        Some(Command::Launch { agent, profile }) => cmd_launch(agent, profile.as_deref()),
+        None => {
+            // 双击启动或无参数：显示帮助并等待按键
+            println!("Agent Manager v{}", env!("CARGO_PKG_VERSION"));
+            println!("在终端中使用以下命令：");
+            println!();
+            println!("  agent-manager scan         扫描已安装的 Agent");
+            println!("  agent-manager profile list  列出所有 Profile");
+            println!("  agent-manager skill list    列出所有 Skills");
+            println!("  agent-manager launch <name> 启动 Agent");
+            println!();
+            println!("按任意键退出...");
+            let _ = std::io::stdin().read_line(&mut String::new());
+        }
     }
 }
 
