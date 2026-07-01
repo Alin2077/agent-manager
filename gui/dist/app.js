@@ -1,3 +1,6 @@
+// Tauri v2 IPC wrapper
+const __invoke = (cmd, args = {}) => window.__TAURI__.core.invoke(cmd, args);
+
 // ── Navigation ──
 
 document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -56,7 +59,7 @@ async function scanAndShow() {
   list.innerHTML = '<div class="empty">扫描中...</div>';
 
   try {
-    const agents = await window.__TAURI__.invoke('scan_agents');
+    const agents = await __invoke('scan_agents');
     if (agents.length === 0) {
       list.innerHTML = '<div class="empty">未检测到任何 Agent</div>';
       return;
@@ -100,8 +103,8 @@ async function refreshProfileList() {
   const list = document.getElementById('profile-list');
   try {
     const [profiles, defaultName] = await Promise.all([
-      window.__TAURI__.invoke('list_profiles'),
-      window.__TAURI__.invoke('get_default_profile'),
+      __invoke('list_profiles'),
+      __invoke('get_default_profile'),
     ]);
     if (profiles.length === 0) {
       list.innerHTML = '<div class="empty">还没有 Profile，点击上方按钮创建</div>';
@@ -154,7 +157,7 @@ function openProfileModal(name = null) {
 
   // Fill existing data if editing
   if (isEdit) {
-    window.__TAURI__.invoke('get_profile', { name }).then(p => {
+    __invoke('get_profile', { name }).then(p => {
       if (p) {
         document.getElementById('pf-format').value = p.format;
         document.getElementById('pf-url').value = p.base_url;
@@ -176,7 +179,7 @@ function openProfileModal(name = null) {
       extra: {},
     };
     try {
-      await window.__TAURI__.invoke('save_profile', { profile });
+      await __invoke('save_profile', { profile });
       modal.remove();
       toast(isEdit ? `Profile '${profile.name}' 已更新` : `Profile '${profile.name}' 已创建`);
       refreshProfileList();
@@ -191,7 +194,7 @@ function openProfileModal(name = null) {
 async function delProfile(name) {
   if (!confirm(`确认删除 Profile "${name}"？`)) return;
   try {
-    await window.__TAURI__.invoke('delete_profile', { name });
+    await __invoke('delete_profile', { name });
     toast(`Profile "${name}" 已删除`);
     refreshProfileList();
   } catch (e) {
@@ -201,7 +204,7 @@ async function delProfile(name) {
 
 async function setDefaultProfile(name) {
   try {
-    await window.__TAURI__.invoke('set_default_profile', { name });
+    await __invoke('set_default_profile', { name });
     toast(`默认 Profile = "${name}"`);
     refreshProfileList();
   } catch (e) {
@@ -226,7 +229,7 @@ async function renderSkills() {
 async function refreshSkillList() {
   const list = document.getElementById('skill-list');
   try {
-    const skills = await window.__TAURI__.invoke('list_skills');
+    const skills = await __invoke('list_skills');
     if (skills.length === 0) {
       list.innerHTML = '<div class="empty">还没有 Skill，点击上方按钮创建</div>';
       return;
@@ -269,7 +272,7 @@ function openSkillModal(name = null) {
   document.body.appendChild(modal);
 
   if (isEdit) {
-    window.__TAURI__.invoke('get_skill', { name }).then(s => {
+    __invoke('get_skill', { name }).then(s => {
       if (s) {
         document.getElementById('sk-desc').value = s.description;
         document.getElementById('sk-ver').value = s.version;
@@ -286,7 +289,7 @@ function openSkillModal(name = null) {
       prompt: document.getElementById('sk-prompt').value,
     };
     try {
-      await window.__TAURI__.invoke('save_skill', { skill });
+      await __invoke('save_skill', { skill });
       modal.remove();
       toast(isEdit ? `Skill '${skill.name}' 已更新` : `Skill '${skill.name}' 已创建`);
       refreshSkillList();
@@ -301,7 +304,7 @@ function openSkillModal(name = null) {
 async function delSkill(name) {
   if (!confirm(`确认删除 Skill "${name}"？`)) return;
   try {
-    await window.__TAURI__.invoke('delete_skill', { name });
+    await __invoke('delete_skill', { name });
     toast(`Skill "${name}" 已删除`);
     refreshSkillList();
   } catch (e) {
@@ -317,8 +320,8 @@ async function renderLaunch() {
   const content = document.getElementById('content');
   try {
     const [agents, profiles] = await Promise.all([
-      window.__TAURI__.invoke('scan_agents'),
-      window.__TAURI__.invoke('list_profiles'),
+      __invoke('scan_agents'),
+      __invoke('list_profiles'),
     ]);
     if (agents.length === 0) {
       content.innerHTML = '<div class="page-title">🚀 Launch</div><div class="empty">未检测到 Agent，请先在 Agents 页面扫描</div>';
@@ -358,7 +361,7 @@ async function doLaunch() {
   const result = document.getElementById('launch-result');
   result.innerHTML = '启动中...';
   try {
-    const code = await window.__TAURI__.invoke('launch_agent', { agent, profile });
+    const code = await __invoke('launch_agent', { agent, profile });
     result.innerHTML = code === 0
       ? '<span style="color:var(--success)">Agent 已退出</span>'
       : `<span style="color:var(--danger)">Agent 退出码: ${code}</span>`;
@@ -377,14 +380,14 @@ showVersion();
 
 async function showVersion() {
   try {
-    const v = await window.__TAURI__.invoke('get_version');
+    const v = await __invoke('get_version');
     document.getElementById('version-label').textContent = 'v' + v;
   } catch (_) {}
 }
 
 async function checkUpdate() {
   try {
-    const msg = await window.__TAURI__.invoke('check_update');
+    const msg = await __invoke('check_update');
     toast(msg);
     showVersion();
   } catch (e) {

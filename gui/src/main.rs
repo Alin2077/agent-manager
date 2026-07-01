@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 use agent_manager_core::{config, launcher, models, scanner, skills};
 use tauri_plugin_updater::UpdaterExt;
 
