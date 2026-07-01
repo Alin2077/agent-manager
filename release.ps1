@@ -22,7 +22,6 @@ if (-not $newVersion) {
     exit 1
 }
 
-# Ensure v prefix
 if (-not $newVersion.StartsWith("v")) {
     $newVersion = "v$newVersion"
 }
@@ -38,7 +37,17 @@ if ($confirm -ne "y" -and $confirm -ne "Y") {
     exit 0
 }
 
-# 4. Check working tree is clean
+# 4. Handle existing tag (local + remote)
+$tagExists = git tag -l $newVersion
+if ($tagExists) {
+    Write-Host ""
+    Write-Host "Tag $newVersion already exists, removing..." -ForegroundColor Yellow
+    git tag -d $newVersion
+    git push origin :refs/tags/$newVersion 2>$null
+    Write-Host "Old tag removed." -ForegroundColor Gray
+}
+
+# 5. Check working tree is clean
 $status = git status --porcelain
 if ($status) {
     Write-Host "Warning: uncommitted changes:" -ForegroundColor Yellow
@@ -50,7 +59,7 @@ if ($status) {
     }
 }
 
-# 5. Tag and push
+# 6. Tag and push
 Write-Host ""
 Write-Host "Creating tag: $newVersion ..." -ForegroundColor Cyan
 git tag $newVersion
