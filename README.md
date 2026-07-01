@@ -48,7 +48,18 @@ xattr -d com.apple.quarantine /usr/local/bin/agent-manager 2>/dev/null  # 跳过
 agent-manager --help
 ```
 
-### 方式二：Cargo 安装
+### 方式二：桌面 GUI 安装包（推荐普通用户）
+
+从 [Releases](https://github.com/Alin2077/agent-manager/releases) 页面下载对应平台的安装程序：
+
+| 平台 | 文件 | 安装方式 |
+|------|------|----------|
+| Windows | `Agent Manager_*.msi` | 双击运行，按向导安装 |
+| macOS | `Agent Manager_*.dmg` | 打开后拖入 Applications |
+| Linux | `Agent Manager_*.deb` | `sudo dpkg -i <file>.deb` |
+| Linux | `Agent Manager_*.AppImage` | `chmod +x` 后直接运行 |
+
+### 方式三：Cargo 安装（CLI）
 
 ```bash
 cargo install --git https://github.com/Alin2077/agent-manager.git
