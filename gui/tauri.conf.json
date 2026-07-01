@@ -15,6 +15,16 @@
                                 "icons/icon.ico"
                             ]
                },
+    "plugins": {
+        "updater": {
+            "endpoints": [
+                "https://github.com/Alin2077/agent-manager/releases/latest/download/latest.json"
+            ],
+            "windows": {
+                "installMode": "passive"
+            }
+        }
+    },
     "app":  {
                 "withGlobalTauri": true,
                 "windows":  [

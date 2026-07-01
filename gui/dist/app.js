@@ -369,3 +369,28 @@ async function doLaunch() {
 
 // ── Init ──
 loadPage('agents');
+showVersion();
+
+// ═══════════════════════════════════════════
+// UPDATE CHECK
+// ═══════════════════════════════════════════
+
+async function showVersion() {
+  try {
+    const v = await window.__TAURI__.invoke('get_version');
+    document.getElementById('version-label').textContent = 'v' + v;
+  } catch (_) {}
+}
+
+async function checkUpdate() {
+  const label = document.getElementById('version-label');
+  label.textContent = '检查中...';
+  try {
+    const msg = await window.__TAURI__.invoke('check_update');
+    toast(msg);
+    showVersion();
+  } catch (e) {
+    toast('检查更新失败: ' + e, 'error');
+    showVersion();
+  }
+}
