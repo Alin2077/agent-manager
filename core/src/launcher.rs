@@ -30,8 +30,6 @@ pub fn launch_agent(agent: &str, profile_name: Option<&str>) -> Result<i32, Stri
 
     let mut cmd = Command::new(&agent_path);
     cmd.env(env_key_name, &api_key);
-    // 传 --model 参数，所有主流 Agent 都支持
-    cmd.arg("--model").arg(&profile.model);
 
     match profile.format {
         AgentFormat::OpenAI => {
@@ -49,6 +47,14 @@ pub fn launch_agent(agent: &str, profile_name: Option<&str>) -> Result<i32, Stri
         AgentFormat::Custom => {
             cmd.env("API_BASE_URL", &effective_url);
             cmd.env("API_MODEL", &profile.model);
+        }
+    }
+
+    // 支持 extra 字段作为额外启动参数
+    for (k, v) in &profile.extra {
+        cmd.arg(format!("--{}", k));
+        if !v.is_empty() {
+            cmd.arg(v);
         }
     }
 
