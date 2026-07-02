@@ -1,7 +1,6 @@
 #![windows_subsystem = "windows"]
 
 use agent_manager_core::{config, launcher, models, scanner, skills};
-use tauri_plugin_updater::UpdaterExt;
 
 // ── Agents ──
 
@@ -114,23 +113,40 @@ fn save_language(lang: String) -> Result<(), String> {
 
 #[tauri::command]
 async fn check_update(app: tauri::AppHandle) -> Result<String, String> {
-    let updater = app.updater().map_err(|e| e.to_string())?;
-    match updater.check().await.map_err(|e| e.to_string())? {
-        Some(update) => {
-            let version = update.version.clone();
-            update.download_and_install(
-                |_chunk, _total| {},
-                || {}
-            ).await.map_err(|e| e.to_string())?;
-            Ok(format!("已更新到 v{}，请重启应用", version))
-        }
-        None => Ok("已是最新版本".into()),
+    let current = app.package_info().version.to_string();
+    let url = "https://api.github.com/repos/Alin2077/agent-manager/releases/latest";
+
+    let client = reqwest::Client::new();
+    let resp = client
+        .get(url)
+        .header("User-Agent", "agent-manager")
+        .send()
+        .await
+        .map_err(|e| format!("网络请求失败: {}", e))?;
+
+    let json: serde_json::Value = resp
+        .json()
+        .await
+        .map_err(|e| format!("解析失败: {}", e))?;
+
+    let latest = json["tag_name"]
+        .as_str()
+        .unwrap_or("v0.0.0")
+        .trim_start_matches('v');
+
+    if latest != current {
+        let html_url = json["html_url"].as_str().unwrap_or(
+            "https://github.com/Alin2077/agent-manager/releases/latest"
+        );
+        webbrowser::open(html_url).ok();
+        Ok(format!("发现新版本 v{}（当前 v{}），已打开下载页面", latest, current))
+    } else {
+        Ok(format!("已是最新版本 v{}", current))
     }
 }
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             scan_agents,
