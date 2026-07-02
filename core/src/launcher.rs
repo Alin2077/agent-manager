@@ -30,6 +30,8 @@ pub fn launch_agent(agent: &str, profile_name: Option<&str>) -> Result<i32, Stri
 
     let mut cmd = Command::new(&agent_path);
     cmd.env(env_key_name, &api_key);
+    // 传 --model 参数，所有主流 Agent 都支持
+    cmd.arg("--model").arg(&profile.model);
 
     match profile.format {
         AgentFormat::OpenAI => {
