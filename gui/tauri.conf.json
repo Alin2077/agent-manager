@@ -1,6 +1,6 @@
 {
     "productName":  "Agent Manager",
-    "version":  "0.2.17",
+    "version":  "0.2.18",
     "identifier":  "com.agent-manager.app",
     "build":  {
                   "frontendDist":  "dist",
