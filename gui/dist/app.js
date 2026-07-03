@@ -296,6 +296,7 @@ async function refreshProfileList() {
             <div class="card-meta">${p.base_url}</div>
           </div>
           <button class="btn btn-primary btn-sm" onclick="doLaunch('${p.agent}', '${p.name}')">${t('launch')}</button>
+          <button class="btn-sm" onclick="copyProfileJson('${p.name}')" title="复制 Profile JSON">📋</button>
           <button class="btn-sm" onclick="openProfileModal('${p.name}')">${t('edit')}</button>
           <button class="btn-sm" style="color:var(--danger)" onclick="delProfile('${p.name}')">${t('del')}</button>
           ${p.name !== defaultName ? `<button class="btn-sm" onclick="setDefaultProfile('${p.name}')">${t('setDefault')}</button>` : ''}
@@ -411,6 +412,21 @@ async function delProfile(name) {
     toast(`"${name}" ${t('deleted')}`);
     refreshProfileList();
   } catch (e) { logError('Profiles', '删除 Profile 失败', e); logAndToast('Profiles', `删除失败: ${e.message || e}`); }
+}
+
+async function copyProfileJson(name) {
+  try {
+    const p = await invoke('get_profile', { name });
+    if (!p) { toast('Profile 不存在', 'error'); return; }
+    // 脱敏 api_key
+    const safe = { ...p, api_key: p.api_key ? '***' : '' };
+    const json = JSON.stringify(safe, null, 2);
+    await navigator.clipboard.writeText(json);
+    toast('Profile JSON 已复制到剪贴板（API Key 已脱敏）');
+  } catch (e) {
+    logError('Profiles', '复制 Profile JSON 失败', e);
+    toast('复制失败', 'error');
+  }
 }
 
 async function setDefaultProfile(name) {
